@@ -1,0 +1,11 @@
+{
+    "files.exclude": {
+        "**/.git": true,         // this is a default value
+        "**/.DS_Store": true,    // this is a default value
+        "2024/bazel-2024": true,   // ignore bazel output directories
+        "2024/bazel-bin": true, 
+        "2024/bazel-out": true, 
+        "2024/bazel-testlogs": true,
+        "2024/MODULE.bazel.lock": true
+    }
+}
