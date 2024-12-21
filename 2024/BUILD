@@ -5,3 +5,11 @@ cc_binary(
         "common/main.cpp"
     ],
 )
+
+cc_binary(
+    name = "day2",
+    srcs = [
+        "day2.cpp", 
+        "common/main.cpp"
+    ],
+)
