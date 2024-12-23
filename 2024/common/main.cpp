@@ -58,7 +58,7 @@ std::filesystem::path FindBestPath(int day, int part, InputType inputType) {
 
 int main(int argc, char** argv) {
     if (argc < 2) {
-        std::cout << "Usage: {partNum} {test|prod}" << std::endl;
+        std::cout << "Usage: {partNum} {test|full}" << std::endl;
         return 0;
     }
 
