@@ -117,50 +117,17 @@ public:
     }
 };
 
-
-void PrintGraph(const Pose& blockPose, const std::vector<std::vector<bool>>& oGrid, const std::unordered_set<std::pair<int,int>, hash_pair>& visited, const std::unordered_set<std::pair<int,int>, hash_pair>& blockPath) {
-    int numRows = oGrid.size();
-    int numCols = oGrid[0].size();
-
-    for (int i = 0; i < numRows; i++) {
-        for (int j = 0; j < numCols; j++) {
-            auto pos = std::make_pair(i, j);
-            char c;
-            if (pos == blockPose.pos) {
-                c = 'O';
-            } else if (blockPath.contains(pos)) {
-                c = '-';
-            } else if (visited.contains(pos)) {
-                c = 'X';
-            } else if (oGrid[i][j]) {
-                c = '#';
-            } else {
-                c = '.';
-            }
-            std::cout << c;
-        }
-        std::cout << std::endl;
-    }
-}
-
-bool IsLoop(const std::vector<std::vector<bool>>& oGrid, const Pose& nextPose, const Pose& startPose, std::unordered_set<Pose, hash_pose> visited, bool print) {
+bool IsLoop(const std::vector<std::vector<bool>>& oGrid, const Pose& startPose) {
     int numRows = oGrid.size();
     int numCols = oGrid[0].size();
 
     std::unordered_set<std::pair<int,int>, hash_pair> loopPositions;
-
+    std::unordered_set<Pose, hash_pose> visited;
 
     // Turn the guardPose to the right to avoid self-hits
-    Pose guardPose = startPose.turnRight();
+    Pose guardPose = startPose;
     while (IsValidPos(guardPose.pos, numRows, numCols)) {
         if (visited.contains(guardPose)) {
-            if (print) {
-                std::unordered_set<std::pair<int, int>, hash_pair> visitedPos;
-                for (const auto& pose : visited) {
-                    visitedPos.insert(pose.pos);
-                }
-                PrintGraph(nextPose, oGrid, visitedPos, loopPositions);
-            }
             return true;
         }
         visited.insert(guardPose);
@@ -195,36 +162,22 @@ void part2(std::ifstream& infile) {
         .dir = std::make_pair(-1,0)
     };
 
-    std::unordered_set<Pose, hash_pose> visited;
-    std::unordered_set<std::pair<int, int>, hash_pair> visitedPos;
     std::unordered_set<std::pair<int, int>, hash_pair> potentialBlocks;
 
-    while (IsValidPos(guardPose.pos, numRows, numCols)) {
-        visited.insert(guardPose);
-        visitedPos.insert(guardPose.pos);
-        // std::cout << guardPos.first << "," << guardPos.second << std::endl;
-
-        Pose nextGuardPose = guardPose.moveOne();
-
-        if (!IsValidPos(nextGuardPose.pos, numRows, numCols)) {
-            break;
-        }
-
-        if (lab.oGrid[nextGuardPose.pos.first][nextGuardPose.pos.second]) {
-            nextGuardPose = guardPose.turnRight();
-        } else if (nextGuardPose.pos != lab.guardPos) {
-            lab.oGrid[nextGuardPose.pos.first][nextGuardPose.pos.second] = true;
-            if (IsLoop(lab.oGrid, nextGuardPose, guardPose, visited, false)) {
-                potentialBlocks.insert(nextGuardPose.pos);
-                // std::cout << std::endl;
+    for (int oi = 0; oi < numRows; oi++) {
+        for (int oj = 0; oj < numCols; oj++) {
+            if (lab.oGrid[oi][oj] || (oi == lab.guardPos.first && oj == lab.guardPos.second)) {
+                continue;
             }
-            lab.oGrid[nextGuardPose.pos.first][nextGuardPose.pos.second] = false;
-        }
 
-        guardPose = nextGuardPose;
+            lab.oGrid[oi][oj] = true;
+            if (IsLoop(lab.oGrid, guardPose)) {
+                potentialBlocks.insert(std::make_pair(oi, oj));
+            }
+            lab.oGrid[oi][oj] = false;
+        }
     }
 
-    std::cout << potentialBlocks.contains(lab.guardPos) << std::endl;
-    std::cout << "Positions visited: " << visitedPos.size() << std::endl;
+    // std::cout << "Positions visited: " << visitedPos.size() << std::endl;
     std::cout << "Blocks detected: " << potentialBlocks.size() << std::endl;
 }
